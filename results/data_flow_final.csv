@@ -1,0 +1,8 @@
+stage,reviews,users,products,removed_from_previous,partition_of
+raw_review_files,1094411,503216,2351,,
+valid_reviews_with_ingredient_product,1071865,495408,2224,22546.0,
+unique_positive_user_product_interactions,875433,423398,2216,196432.0,
+eligible_users_ge_3_positive,445030,80889,2138,430403.0,
+train,283252,80889,2001,,eligible_users_ge_3_positive
+validation,80889,80889,1911,,eligible_users_ge_3_positive
+test,80889,80889,1948,,eligible_users_ge_3_positive

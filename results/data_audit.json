@@ -1,0 +1,27 @@
+{
+  "raw_reviews": 1094411,
+  "raw_review_users": 503216,
+  "raw_review_products": 2351,
+  "metadata_products": 8494,
+  "metadata_products_with_ingredients": 7549,
+  "review_products_missing_metadata": 0,
+  "metadata_products_without_reviews": 6143,
+  "missing_author": 0,
+  "missing_product": 0,
+  "missing_rating": 0,
+  "invalid_date": 0,
+  "duplicate_review_rows_including_all_copies": 910,
+  "positive_reviews_rating_ge_4": 898340,
+  "negative_reviews_rating_le_2": 114255,
+  "neutral_reviews_rating_eq_3": 81816,
+  "date_min": "2008-08-28",
+  "date_max": "2023-03-21",
+  "source_sha256": {
+    "reviews_0-250.csv": "97c0e4beb282c8e85172dba7d7d08af454665a9c3cee95e446ae344639e27a82",
+    "reviews_1250-end.csv": "54d9ec2339dab3661ce2d58af883f8c8c29080918ce906b0bc0c83997d12cab0",
+    "reviews_250-500.csv": "a84ce0dae70025d22d16bd8488d88223e9401a448fad42b10c8446b913c26133",
+    "reviews_500-750.csv": "7ebed9367af4325ac3ebef6d21971932d9cb1476aa681cfc91a7fbf0e7f767d5",
+    "reviews_750-1250.csv": "2db1f683b8512eda6894f2ebbc3cde5b899c7a680da5bae97ff4f70c0945a6ca",
+    "product_info.csv": "d5ddb391be522e7bfcecbba93dd61129217c1381bf14a7580c0f6097ac8da063"
+  }
+}

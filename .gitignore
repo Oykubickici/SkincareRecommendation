@@ -1,0 +1,40 @@
+# Raw and intermediate data
+data/
+*.csv
+*.parquet
+*.pkl
+*.pickle
+*.npy
+*.npz
+*.pt
+
+# Keep generated, compact publication artifacts
+!results/*.csv
+!results/*.json
+!reports/*.md
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+.venv/
+
+# LaTeX build files
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+# Local QA and temporary outputs
+tmp/
+output/qa/
+output/
+manuscript/
+reports/
+.DS_Store

@@ -1,0 +1,15 @@
+{
+  "eligible_users": 80889,
+  "candidate_products": 2224,
+  "train_interactions": 283252,
+  "validation_interactions": 80889,
+  "test_interactions": 80889,
+  "train_products": 2001,
+  "validation_products": 1911,
+  "test_products": 1948,
+  "tfidf_features": 3231,
+  "binary_ingredient_entities": 5660,
+  "exact_or_near_duplicate_groups": 2014,
+  "positive_definition": "rating >= 4",
+  "candidate_policy": "full ingredient-eligible review catalog minus seen train items"
+}

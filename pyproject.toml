@@ -1,0 +1,24 @@
+[project]
+name = "skincare-recommendation-revision"
+version = "0.1.0"
+description = "Leakage-audited experiments for the IEEE Access skincare recommendation revision"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+  "numpy>=1.26,<3",
+  "pandas>=2.1,<3",
+  "scipy>=1.11,<2",
+  "scikit-learn>=1.4,<2",
+  "matplotlib>=3.8,<4",
+  "PyYAML>=6,<7",
+  "torch>=2.2,<3",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<9"]
+
+[project.scripts]
+skincare-revision = "skincare_rec.cli:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

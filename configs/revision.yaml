@@ -1,0 +1,37 @@
+data:
+  root: data/raw
+  product_file: product_info.csv
+  review_glob: reviews_*.csv
+  positive_rating: 4
+  negative_rating: 2
+  min_positive_interactions: 3
+
+features:
+  min_df_candidates: [1, 2, 5, 10]
+  feature_cap_candidates: [null, 200, 500, 1000]
+  selected_min_df: 2
+  selected_feature_cap: null
+  near_duplicate_jaccard: 0.95
+
+evaluation:
+  ks: [5, 10, 20]
+  reverse_ms: [100, 500, 1000]
+  batch_size: 512
+  bootstrap_samples: 200
+  temporal_cutoffs: 5
+  seeds: [13, 37, 73, 101, 2026]
+  primary_seed: 2026
+
+models:
+  svd_factors: 64
+  item_knn_neighbors: 100
+  neural_dimension: 32
+  neural_epochs: 5
+  neural_batch_size: 4096
+  neural_learning_rate: 0.001
+  lightgcn_layers: 2
+
+outputs:
+  results_dir: results
+  reports_dir: reports
+  cache_dir: data/cache
