@@ -9,6 +9,19 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_executed_warm_metrics_satisfy_leave_one_out_identities() -> None:
     metrics = pd.read_csv(ROOT / "results" / "warm_start_metrics.csv")
+    assert set(metrics["model"]) == {
+        "Random",
+        "Popularity",
+        "Binary Ingredient Cosine",
+        "Ingredient Jaccard",
+        "BM25 Ingredient",
+        "TF-IDF Ingredient",
+        "Item-kNN",
+        "SVD",
+        "Feature-aware BPR",
+        "NCF",
+        "LightGCN",
+    }
     bounded = [
         "precision",
         "recall_hit_rate",

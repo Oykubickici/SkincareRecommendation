@@ -43,7 +43,7 @@ def _parser() -> argparse.ArgumentParser:
         "--neural",
         nargs="*",
         default=[],
-        choices=["lightfm", "ncf", "lightgcn"],
+        choices=["feature-bpr", "ncf", "lightgcn"],
         help="Neural/hybrid models to include in warm-start evaluation",
     )
     return parser

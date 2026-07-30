@@ -39,7 +39,7 @@ from .models import (
     RandomModel,
     SVDModel,
 )
-from .neural import HybridLightFMModel, LightGCNModel, NCFModel
+from .neural import FeatureAwareBPRModel, LightGCNModel, NCFModel
 
 
 def run_audit(config: dict[str, Any], workspace: Path) -> None:
@@ -112,8 +112,8 @@ def _neural_model(
         "learning_rate": float(config["models"]["neural_learning_rate"]),
         "seed": int(config["evaluation"]["primary_seed"]),
     }
-    if name == "lightfm":
-        return HybridLightFMModel(
+    if name == "feature-bpr":
+        return FeatureAwareBPRModel(
             item_features=data.tfidf_features,
             batch_size=int(config["models"]["neural_batch_size"]),
             **common,

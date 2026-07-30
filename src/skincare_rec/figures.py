@@ -156,9 +156,9 @@ def cluster_figures(config: dict[str, Any], workspace: Path) -> list[Path]:
     model = MiniBatchKMeans(
         n_clusters=best_k,
         random_state=int(config["evaluation"]["primary_seed"]),
-        n_init=10,
+        n_init=5,
         batch_size=2048,
-        max_iter=300,
+        max_iter=200,
     ).fit(profiles)
     centers = model.cluster_centers_
     top_indices = np.unique(

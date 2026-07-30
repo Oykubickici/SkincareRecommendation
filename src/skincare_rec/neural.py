@@ -34,15 +34,16 @@ class _BPRBase:
         return -torch.nn.functional.logsigmoid(positive - negative).mean()
 
 
-class HybridLightFMModel(_BPRBase):
+class FeatureAwareBPRModel(_BPRBase):
     """Feature-aware latent factor model trained with BPR.
 
-    This is the reproducible hybrid baseline used in place of an unavailable
-    platform-specific LightFM binary. Item representations combine a free item
-    embedding and a linear projection of training-fitted ingredient features.
+    Item representations combine a free item embedding and a linear projection
+    of training-fitted ingredient features, following LightFM's metadata-
+    embedding principle. This implementation is not presented as the LightFM
+    library.
     """
 
-    name = "Hybrid LightFM"
+    name = "Feature-aware BPR"
 
     def __init__(
         self,

@@ -25,7 +25,7 @@ pytest -q
 
 PYTHONPATH=src python -m skincare_rec.cli all \
   --config configs/revision.yaml \
-  --neural lightfm ncf lightgcn
+  --neural feature-bpr ncf lightgcn
 ```
 
 The `all` command runs the audit, chronological warm-start split, validation

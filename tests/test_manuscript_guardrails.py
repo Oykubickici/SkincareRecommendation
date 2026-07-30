@@ -30,6 +30,10 @@ def test_revised_manuscript_has_no_known_unsupported_claims():
     text = manuscript.read_text(encoding="utf-8")
     for phrase in FORBIDDEN_UNSUPPORTED_CLAIMS:
         assert phrase not in text
+    assert r"\mathbf{U}_u \in \mathbb{R}^{3231}" in text
+    assert r"\log\left(\frac{1+N}{1+|\{i : c \in C_i\}|}\right)+1" in text
+    assert "Feature-aware BPR" in text
+    assert "Hybrid LightFM" not in text
 
 
 def test_revised_manuscript_references_resolve():
