@@ -1,8 +1,10 @@
 # Skincare recommendation revision
 
 This directory is the reproducible revision workspace for manuscript
-`Access-2026-23560`. The original notebooks and Overleaf export are preserved
-outside this directory and under `manuscript/original/`.
+`Access-2026-23560`. This public repository contains the code, configuration,
+tests, and aggregate result files only. The manuscript sources, the original
+notebooks and Overleaf export, and the internal submission reports are kept in
+the private workspace and are not redistributed here.
 
 ## Data
 
@@ -53,10 +55,24 @@ for revised claims. Random seeds and all evaluation settings are fixed in
 - Reverse recommendation removes the target product from each candidate user
   profile.
 
+## Note on the two temporal files
+
+`results/temporal_metrics.csv` holds the five rolling-cutoff results reported in
+the manuscript. Its cutoffs are the 0.55–0.75 date quantiles of the
+**deduplicated positive interactions of the eligible users** that the
+experiments actually rank.
+
+`results/temporal_cutoff_summary.csv` is a descriptive audit table computed
+before any deduplication or user-eligibility filtering, so its quantiles fall on
+the **raw positive review rows**. The two files therefore list different cutoff
+dates and different interaction counts by construction; only
+`temporal_metrics.csv` backs the numbers in the paper.
+
 ## Submission artifacts
 
-The clean and highlighted manuscripts, response letter, resubmission
-checklist, compliance matrix, and controlled change log are generated under
-`output/` and `reports/`. The public revision repository is:
+The clean and highlighted manuscripts, response letter, resubmission checklist,
+compliance matrix, and controlled change log are produced in the private
+workspace and are not part of this repository. The public revision repository
+is:
 
 <https://github.com/Oykubickici/SkincareRecommendation>
