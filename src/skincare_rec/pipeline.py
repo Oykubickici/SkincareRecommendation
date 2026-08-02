@@ -314,6 +314,142 @@ def run_feature_ablation(
     return result
 
 
+def run_profile_construction_ablation(
+    config: dict[str, Any],
+    workspace: Path,
+    sample_users: int = 10_000,
+    rocchio_beta: float = 0.5,
+) -> pd.DataFrame:
+    """Compare user-profile construction strategies on the validation split.
+
+    Under L2-normalized cosine scoring, a raw interaction-count sum and a
+    mean profile are mathematically identical: mean = sum / |interactions|,
+    a positive per-user scalar removed by normalization before scoring. The
+    "TF-IDF Ingredient" model used everywhere else is therefore already both
+    the sum and the mean profile. The two constructions that do change
+    relative item weights, and that this ablation evaluates, are a
+    rating-weighted sum and a Rocchio-style profile that subtracts negative
+    feedback.
+    """
+
+    data = load_prepared(config, workspace)
+    paths = resolve_paths(config, workspace)
+    positive_threshold = int(config["data"]["positive_rating"])
+    negative_threshold = int(config["data"]["negative_rating"])
+    user_map = {value: idx for idx, value in enumerate(data.users)}
+    item_map = {value: idx for idx, value in enumerate(data.item_ids)}
+    training_items = set(np.unique(data.train_item).tolist())
+
+    positive_reviews = data.reviews[
+        data.reviews["rating"] >= positive_threshold
+    ][["author_id", "product_id", "rating", "submission_time"]].copy()
+    positive_reviews = positive_reviews[
+        positive_reviews["author_id"].isin(user_map)
+        & positive_reviews["product_id"].isin(item_map)
+    ]
+    positive_reviews = positive_reviews.sort_values(
+        ["author_id", "product_id", "submission_time"]
+    ).drop_duplicates(["author_id", "product_id"], keep="last")
+    positive_reviews["user_idx"] = (
+        positive_reviews["author_id"].map(user_map).astype(np.int32)
+    )
+    positive_reviews["item_idx"] = (
+        positive_reviews["product_id"].map(item_map).astype(np.int32)
+    )
+
+    # Ratings for exactly the leakage-safe training pairs used everywhere
+    # else (data.train_user / data.train_item); no new interactions added.
+    train_pairs = pd.DataFrame(
+        {"user_idx": data.train_user, "item_idx": data.train_item}
+    )
+    train_ratings = train_pairs.merge(
+        positive_reviews[["user_idx", "item_idx", "rating"]],
+        on=["user_idx", "item_idx"],
+        how="left",
+    )
+    train_ratings["rating"] = train_ratings["rating"].fillna(positive_threshold)
+    rating_weighted = sparse.csr_matrix(
+        (
+            train_ratings["rating"].to_numpy(dtype=np.float32),
+            (
+                train_ratings["user_idx"].to_numpy(),
+                train_ratings["item_idx"].to_numpy(),
+            ),
+        ),
+        shape=data.train_matrix.shape,
+    )
+
+    # Negative feedback restricted to training-fitted items only, so no
+    # validation/test target item's content ever enters a profile.
+    negative_reviews = data.reviews[
+        data.reviews["rating"] <= negative_threshold
+    ][["author_id", "product_id"]].copy()
+    negative_reviews = negative_reviews[
+        negative_reviews["author_id"].isin(user_map)
+        & negative_reviews["product_id"].isin(item_map)
+    ]
+    negative_reviews["user_idx"] = (
+        negative_reviews["author_id"].map(user_map).astype(np.int32)
+    )
+    negative_reviews["item_idx"] = (
+        negative_reviews["product_id"].map(item_map).astype(np.int32)
+    )
+    negative_reviews = negative_reviews[
+        negative_reviews["item_idx"].isin(training_items)
+    ].drop_duplicates(["user_idx", "item_idx"])
+    negative_matrix = sparse.csr_matrix(
+        (
+            np.ones(len(negative_reviews), dtype=np.float32),
+            (
+                negative_reviews["user_idx"].to_numpy(),
+                negative_reviews["item_idx"].to_numpy(),
+            ),
+        ),
+        shape=data.train_matrix.shape,
+    )
+    rocchio_matrix = (rating_weighted - rocchio_beta * negative_matrix).tocsr()
+
+    rng = np.random.default_rng(int(config["evaluation"]["primary_seed"]))
+    count = min(sample_users, len(data.val_user))
+    chosen = np.sort(rng.choice(len(data.val_user), size=count, replace=False))
+    users = data.val_user[chosen]
+    targets = data.val_item[chosen]
+
+    variants = [
+        ("Binary Sum/Mean (TF-IDF Ingredient)", data.train_matrix, None),
+        ("Rating-Weighted Sum", rating_weighted, None),
+        (f"Rocchio (beta={rocchio_beta})", rocchio_matrix, rocchio_beta),
+    ]
+    rows: list[dict[str, Any]] = []
+    for name, matrix, beta in variants:
+        model = FeatureCosineModel(name, matrix, data.tfidf_features)
+        result = evaluate_leave_one_out(
+            model,
+            data.train_matrix,
+            users,
+            targets,
+            [10],
+            int(config["evaluation"]["batch_size"]),
+        )
+        row = result.summary.iloc[0].to_dict()
+        row.update(
+            {
+                "profile_construction": name,
+                "rocchio_beta": beta,
+                "selection_split": "validation",
+                "sample_users": int(count),
+                "seed": int(config["evaluation"]["primary_seed"]),
+            }
+        )
+        rows.append(row)
+        print(f"Profile ablation {name}: NDCG@10={row['ndcg']:.6f}", flush=True)
+    result = pd.DataFrame(rows)
+    result.to_csv(
+        paths["results"] / "profile_construction_ablation.csv", index=False
+    )
+    return result
+
+
 def run_duplicate_sensitivity(
     config: dict[str, Any], workspace: Path
 ) -> pd.DataFrame:
@@ -563,14 +699,34 @@ def _topk(scores: np.ndarray, k: int) -> np.ndarray:
 
 
 def run_cold_start_evaluation(
-    config: dict[str, Any], workspace: Path, folds: int = 5
+    config: dict[str, Any],
+    workspace: Path,
+    folds: int = 5,
+    include_neural: list[str] | None = None,
 ) -> pd.DataFrame:
     """Evaluate genuinely unseen formulation groups.
 
     All positive interactions for a held-out formulation group are removed
     before profiles and IDF statistics are created. Ranking is performed only
     among the fold's unseen products, which is stated explicitly in the output.
+
+    Only "feature-bpr" is accepted in ``include_neural`` here. NCF and
+    LightGCN have no content branch: a product with zero training
+    interactions gets a purely random, untrained representation from them,
+    so they cannot produce a meaningful cold-start ranking and are excluded
+    structurally rather than silently reported alongside content-aware
+    methods.
     """
+
+    include_neural = include_neural or []
+    unsupported = [name for name in include_neural if name != "feature-bpr"]
+    if unsupported:
+        print(
+            f"Skipping {unsupported} for cold-start: these models have no "
+            "content branch and cannot score never-seen items.",
+            flush=True,
+        )
+    include_neural = [name for name in include_neural if name == "feature-bpr"]
 
     data = load_prepared(config, workspace)
     paths = resolve_paths(config, workspace)
@@ -641,6 +797,18 @@ def run_cold_start_evaluation(
                 "TF-IDF Ingredient", train_matrix, tfidf
             ),
         ]
+        if "feature-bpr" in include_neural:
+            model_factories.append(
+                lambda: FeatureAwareBPRModel(
+                    train=train_matrix,
+                    item_features=tfidf,
+                    dimension=int(config["models"]["neural_dimension"]),
+                    epochs=int(config["models"]["neural_epochs"]),
+                    batch_size=int(config["models"]["neural_batch_size"]),
+                    learning_rate=float(config["models"]["neural_learning_rate"]),
+                    seed=seed + fold,
+                )
+            )
         relevant = (
             fold_interactions.groupby("user_idx")["item_idx"]
             .apply(lambda values: set(int(x) for x in values))

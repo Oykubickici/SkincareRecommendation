@@ -16,7 +16,7 @@ def _manuscript_path() -> Path:
         Path(__file__).parents[1]
         / "manuscript"
         / "revised"
-        / "main (1).tex"
+        / "main.tex"
     )
 
 

@@ -13,6 +13,7 @@ from .pipeline import (
     run_evaluation,
     run_feature_ablation,
     run_prepare,
+    run_profile_construction_ablation,
     run_reverse_evaluation,
     run_temporal_evaluation,
 )
@@ -29,6 +30,7 @@ def _parser() -> argparse.ArgumentParser:
             "prepare",
             "evaluate",
             "ablation",
+            "profile-ablation",
             "duplicate-sensitivity",
             "temporal",
             "cold-start",
@@ -62,12 +64,14 @@ def main() -> None:
         run_evaluation(config, workspace, args.neural)
     elif args.command == "ablation":
         run_feature_ablation(config, workspace)
+    elif args.command == "profile-ablation":
+        run_profile_construction_ablation(config, workspace)
     elif args.command == "duplicate-sensitivity":
         run_duplicate_sensitivity(config, workspace)
     elif args.command == "temporal":
         run_temporal_evaluation(config, workspace)
     elif args.command == "cold-start":
-        run_cold_start_evaluation(config, workspace)
+        run_cold_start_evaluation(config, workspace, include_neural=args.neural)
     elif args.command == "reverse":
         run_reverse_evaluation(config, workspace)
     elif args.command == "cluster":
@@ -79,10 +83,11 @@ def main() -> None:
         run_audit(config, workspace)
         run_prepare(config, workspace)
         run_feature_ablation(config, workspace)
+        run_profile_construction_ablation(config, workspace)
         run_evaluation(config, workspace, args.neural)
         run_duplicate_sensitivity(config, workspace)
         run_temporal_evaluation(config, workspace)
-        run_cold_start_evaluation(config, workspace)
+        run_cold_start_evaluation(config, workspace, include_neural=args.neural)
         run_reverse_evaluation(config, workspace)
         run_cluster_stability(config, workspace)
         for path in generate_all(config, workspace):

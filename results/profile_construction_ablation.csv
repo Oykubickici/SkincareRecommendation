@@ -1,0 +1,4 @@
+model,k,users,precision,recall_hit_rate,ndcg,mrr,catalog_coverage,profile_construction,rocchio_beta,selection_split,sample_users,seed
+Binary Sum/Mean (TF-IDF Ingredient),10,10000,0.02357,0.2357,0.18004660719149174,0.1624511507936508,0.9662769784172662,Binary Sum/Mean (TF-IDF Ingredient),,validation,10000,2026
+Rating-Weighted Sum,10,10000,0.023490000000000004,0.2349,0.17931549931991678,0.16168623015873015,0.9658273381294964,Rating-Weighted Sum,,validation,10000,2026
+Rocchio (beta=0.5),10,10000,0.02348,0.2348,0.17908659063402596,0.16140400793650791,0.9712230215827338,Rocchio (beta=0.5),0.5,validation,10000,2026

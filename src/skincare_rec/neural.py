@@ -110,6 +110,22 @@ class FeatureAwareBPRModel(_BPRBase):
             self.item_embedding(item_tensor)
             + self.feature_projection(self.features)
         ).detach().cpu().numpy()
+        # Items with zero training interactions (e.g. a genuinely held-out
+        # cold-start product) never appear in `cols`, so their free item
+        # embedding never receives a gradient update and would otherwise
+        # keep contributing its random initial value as noise. Overwrite
+        # those rows with the content-feature term alone so untrained items
+        # are scored purely from their features, matching the cold-start
+        # claim that this model can rank never-seen products.
+        untrained = np.ones(train.shape[1], dtype=bool)
+        untrained[np.unique(cols)] = False
+        if untrained.any():
+            self.item_factors[untrained] = (
+                self.feature_projection(self.features[untrained])
+                .detach()
+                .cpu()
+                .numpy()
+            )
 
     def score(self, user_indices: np.ndarray) -> np.ndarray:
         return self.user_factors[user_indices] @ self.item_factors.T
