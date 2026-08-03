@@ -8,8 +8,8 @@ the private workspace and are not redistributed here.
 
 ## Data
 
-The raw data is the **Sephora Products and Skincare Reviews** dataset by Nady
-Inky, distributed under CC BY 4.0:
+The raw data is the **Sephora Products and Skincare Reviews** dataset published
+on Kaggle by user `nadyinky`, distributed under CC BY 4.0:
 
 <https://www.kaggle.com/datasets/nadyinky/sephora-products-and-skincare-reviews>
 
